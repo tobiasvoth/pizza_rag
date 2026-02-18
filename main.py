@@ -21,6 +21,18 @@ while True:
     if question == "q":
         break
     
-    reviews = retriever.invoke(question)
-    result = chain.invoke({"reviews": reviews, "question": question})
+    docs = retriever.invoke(question)
+    
+    context_text = ""
+    for i, doc in enumerate(docs):
+        context_text += f"\n[Rezension #{i+1}]:\nDatum: {doc.metadata.get('date')}\nBewertung: {doc.metadata.get('rating')} Sterne\nInhalt: {doc.page_content}\n"
+
+
+    result = chain.invoke({"reviews": context_text, "question": question})
+    
+    print("\n--- ANTWORT DES EXPERTEN ---")
     print(result)
+    
+    print("\n--- VERWENDETE QUELLEN (METADATEN) ---")
+    for i, doc in enumerate(docs):
+        print(f"[{i+1}] Datum: {doc.metadata.get('date')} | Rating: {doc.metadata.get('rating')}/5")
